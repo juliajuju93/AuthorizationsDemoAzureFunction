@@ -251,3 +251,8 @@ Now, we can test our Azure Function locally. Hit **F5** or ▶️ and Run the fu
 
 
 Let me know what you think! @[Julia](https://www.linkedin.com/in/jukasper/)
+
+
+## Further Resources
+- 
+- 
