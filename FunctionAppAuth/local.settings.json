@@ -1,0 +1,10 @@
+{
+    "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "CUSTOM_URL": "YOUR_CUSTOM_URL",
+    "SUBSCRIPTION_KEY": "YOUR_SUBCRIPTION_KEY",
+    "TEAMS_URL": "YOUR_TEAMS_URL"
+  }
+}

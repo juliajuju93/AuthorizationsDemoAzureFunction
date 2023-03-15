@@ -148,7 +148,7 @@ Next, we will build our timer triggered function in Azure Functions. For this, y
 Make sure to use Time trigger as the initial trigger for your Azure function.
 ![Additional information](media/additionalinfo.png)
 
-In your [local.settings.json]() file, we will add the following code:
+In your [local.settings.json](FunctionAppAuth/local.settings.json) file, we will add the following code:
 ```
 {
     "IsEncrypted": false,
@@ -162,7 +162,7 @@ In your [local.settings.json]() file, we will add the following code:
 }
 ```
 
-In our [FunctionAppAPIMAuthTest.cs]() file, we will add the following code: 
+In our [FunctionAppAPIMAuthTest.cs](FunctionAppAuth/FunctionAppAPIMAuthTest.cs) file, we will add the following code: 
 ```
 using System;
 using System.Net.Http;
