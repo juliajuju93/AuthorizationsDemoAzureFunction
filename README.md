@@ -8,7 +8,7 @@ Azure API Management accelerates the deployment, monitoring, security, and shari
 Authorizations in API Management is a simple and reliable way to unbundle and abstract authorizations from web APIs. It greatly simplifies the process of authenticating and authorizing user's across one (or) more backend or SaaS services. With Authorizations you can easily configure OAuth, Consent, acquire tokens, cache tokens and refresh tokens without writing a single line of code. It allows you to delegate authentication to your API Management instance. This feature enables APIs to be exposed with or without a subscription key, and the authorization to the backend service uses OAuth 2.0., and reduces development costs in ramping up, implementing and maintaining security features with service integrations. API Management does all the heavy lifting for you, while you can focus on the application/domain logic.
 
 ## Authorization scenario - Time triggered Azure Function ⏳
-In this repo, we will talk about an unattended scenario with Azure Functions. With our [Blog Post: Use Static Web Apps API and API Management Authorizations to integrate third party services](https://link-url-here.org](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/use-static-web-apps-api-and-api-management-authorizations-to/ba-p/3603755), users are able to post a GitHub issue to a repository. We now want to implement a timer triggered function with Azure Functions that will GET the count of GitHub issues and POST about it in a Microsoft Teams channel. This will create a reminder notification in Teams about how many issues are still open:
+In this repo, we will talk about an unattended scenario with Azure Functions. With our [Blog Post: Use Static Web Apps API and API Management Authorizations to integrate third party services](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/use-static-web-apps-api-and-api-management-authorizations-to/ba-p/3603755), users are able to post a GitHub issue to a repository. We now want to implement a timer triggered function with Azure Functions that will GET the count of GitHub issues and POST about it in a Microsoft Teams channel. This will create a reminder notification in Teams about how many issues are still open:
 
 ![Unattended Scenario](media/scenariooverview.png)
 
@@ -148,7 +148,7 @@ Next, we will build our timer triggered function in Azure Functions. For this, y
 Make sure to use Time trigger as the initial trigger for your Azure function.
 ![Additional information](media/additionalinfo.png)
 
-In your [local.settings.json](FunctionAppAuth/local.settings.json) file, we will add the following code:
+In your [local.settings.json](FunctionAppAuth/local.settings.json) file, we added the following code:
 ```
 {
     "IsEncrypted": false,
@@ -162,7 +162,7 @@ In your [local.settings.json](FunctionAppAuth/local.settings.json) file, we will
 }
 ```
 
-In our [FunctionAppAPIMAuthTest.cs](FunctionAppAuth/FunctionAppAPIMAuthTest.cs) file, we will add the following code: 
+In our [FunctionAppAPIMAuthTest.cs](FunctionAppAuth/FunctionAppAPIMAuthTest.cs) file, we added the following code: 
 
 ```
 using System;
