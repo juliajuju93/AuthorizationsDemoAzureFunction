@@ -163,6 +163,7 @@ In your [local.settings.json](FunctionAppAuth/local.settings.json) file, we will
 ```
 
 In our [FunctionAppAPIMAuthTest.cs](FunctionAppAuth/FunctionAppAPIMAuthTest.cs) file, we will add the following code: 
+
 ```
 using System;
 using System.Net.Http;
@@ -239,3 +240,14 @@ namespace FunctionAppAPIMAuthTest
     }
 }
 ```
+
+> Function1 referring to your function class file.
+
+### STEP 5 - Test Azure Function locally
+
+Now, we can test our Azure Function locally. Hit **F5** or ▶️ and Run the function locally. You should see a message within your Microsoft Teams channel similar like this:
+
+![configure](media/teamsmessage.png)
+
+
+Let me know what you think! @[Julia](https://www.linkedin.com/in/jukasper/)
