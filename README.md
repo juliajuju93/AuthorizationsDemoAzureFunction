@@ -62,7 +62,7 @@ For the GitHub API, we want to add the following API:
 
 Once you added the API, we can make use of the provider in the **Inbound Processing Policy** and apply the previously created Authorization. Add the following snipped to the inbound JWT policy:
 
-`
+```
 <policies>
     <inbound>
         <base />
@@ -84,4 +84,4 @@ Once you added the API, we can make use of the provider in the **Inbound Process
         <base />
     </on-error>
 </policies>
-`
+```
