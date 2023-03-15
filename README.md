@@ -10,7 +10,7 @@ Authorizations in API Management is a simple and reliable way to unbundle and ab
 ## Authorization scenario - Time triggered Azure Function ⏳
 In this repo, we will talk about an unattended scenario with Azure Functions. With our [Blog Post: Use Static Web Apps API and API Management Authorizations to integrate third party services](https://link-url-here.org](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/use-static-web-apps-api-and-api-management-authorizations-to/ba-p/3603755), users are able to post a GitHub issue to a repository. We now want to implement a timer triggered function with Azure Functions that will GET the count of GitHub issues and POST about it in a Microsoft Teams channel. This will create a reminder notification in Teams about how many issues are still open:
 
-![Unattended Scenario](scenariooverview.png)
+![Unattended Scenario](.media/scenariooverview.png)
 
 ### Prerequisites
 
@@ -58,6 +58,30 @@ For the GitHub API, we want to add the following API:
 | Display name | *getissues* |
 | **URL** for GET | */repos/{github-alias}/{reponame}/issues* |
 
-![Frontend Git](GETGitHub.png)
+![Frontend Git](.media/GETGitHub.png)
 
 Once you added the API, we can make use of the provider in the **Inbound Processing Policy** and apply the previously created Authorization. Add the following snipped to the inbound JWT policy:
+
+`
+<policies>
+    <inbound>
+        <base />
+        <get-authorization-context provider-id="githubissue01" authorization-id="githubissue01" context-variable-name="auth-context" identity-type="managed" ignore-error="false" />
+        <set-header name="Authorization" exists-action="override">
+            <value>@("Bearer " + ((Authorization)context.Variables.GetValueOrDefault("auth-context"))?.AccessToken)</value>
+        </set-header>
+        <set-header name="User-Agent" exists-action="override">
+            <value>API Management</value>
+        </set-header>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
+`
