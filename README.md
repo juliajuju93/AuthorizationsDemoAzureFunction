@@ -51,7 +51,7 @@ For the GitHub API, we want to add the following API:
 | Display name | *githubissue* |
 | Name | *githubissue* |
 | Web service URL | https://api.github.com |
-| API URL suffix | githubissue |
+| API URL suffix | *githubissue* |
 
 | Settings | Value |
 | ----------- | ----------- |
@@ -84,4 +84,158 @@ Once you added the API, we can make use of the provider in the **Inbound Process
         <base />
     </on-error>
 </policies>
+```
+
+### STEP 3 - Add your Microsoft Graph API and configure a policy
+For the Microsoft Graph API, we want to add the following API:
+
+| Settings | Value |
+| ----------- | ----------- |
+| Display name | *TeamsChannelMessage* |
+| Name | *TeamsChannelMessage* |
+| Web service URL | https://api.github.com |
+| API URL suffix | *TeamsChannelMessage* |
+
+| Settings | Value |
+| ----------- | ----------- |
+| Display name | *postchannelmessage* |
+| **URL** for POST | */v1.0/teams/{team-id}/channels/{channel-id}/messages* |
+
+![Frontend Git](media/GETMSGraph.png)
+Once you added the API, we can make use of the provider in the **Inbound Processing Policy** and apply the previously created Authorization. Add the following snipped to the inbound JWT policy:
+```
+<policies>
+   <inbound>
+       <base />
+       <get-authorization-context provider-id="channel-aad" authorization-id="channel-aad" context-variable-name="auth-context" identity-type="managed" ignore-error="false" />
+       <set-header name="authorization" exists-action="override">
+           <value>@("Bearer " + ((Authorization)context.Variables.GetValueOrDefault("auth-context"))?.AccessToken)</value>
+       </set-header>
+   </inbound>
+   <backend>
+       <base />
+   </backend>
+   <outbound>
+       <base />
+   </outbound>
+   <on-error>
+       <base />
+   </on-error>
+</policies>
+```
+
+> For more information, check out the [get-authorization-context policy references](https://learn.microsoft.com/en-us/azure/api-management/get-authorization-context-policy) to learn more about how to use the policy.
+
+
+### STEP 4 - Test the APIs
+
+1. Select your API and the operation you added previously
+2. Go to the **Test** tab.
+3. Select **Send**.
+
+![APIM Testing](media/testing.png)
+
+### STEP 5 - Building your timer triggered Azure Function
+
+Next, we will build our timer triggered function in Azure Functions. For this, you can follow the [Quickstart: Create your first C# function in Azure using Visual Studio](https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-your-first-function-visual-studio?tabs=in-process). We used the following configurations:
+
+| Settings | Value |
+| ----------- | ----------- |
+| Project name | *postchannelmessage* |
+| Solution name | */v1.0/teams/{team-id}/channels/{channel-id}/messages* |
+
+![configure](media/configure.png)
+Make sure to use Time trigger as the initial trigger for your Azure function.
+![Additional information](media/additionalinfo.png)
+
+In your [local.settings.json]() file, we will add the following code:
+```
+{
+    "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "CUSTOM_URL": "YOUR_CUSTOM_URL",
+    "SUBSCRIPTION_KEY": "YOUR_SUBCRIPTION_KEY",
+    "TEAMS_URL": "YOUR_TEAMS_URL"
+  }
+}
+```
+
+In our [FunctionAppAPIMAuthTest.cs]() file, we will add the following code: 
+```
+using System;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+
+namespace FunctionAppAPIMAuthTest
+{
+    public class Function1
+    {
+        private static HttpClient httpClient = new HttpClient();
+
+        [FunctionName("Function1")]
+        public async Task Run([TimerTrigger("*/1 * * * *")] TimerInfo myTimer, ILogger log)
+        {
+            log.LogInformation($"Timer trigger function started at: {DateTime.Now}");
+
+            //Define header
+            var subscriptionKey = System.Environment.GetEnvironmentVariable("SUBSCRIPTION_KEY", EnvironmentVariableTarget.Process);
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+            //Define GET URL for GET issue count
+            var baseurl = System.Environment.GetEnvironmentVariable("CUSTOM_URL", EnvironmentVariableTarget.Process);
+            var addurl = "?state=open";
+            var _baseurl = baseurl + addurl;
+            log.LogInformation($"URL: {_baseurl}");
+
+            //GET call
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, _baseurl);
+            var response = await httpClient.SendAsync(request);
+            JArray arr = JArray.Parse(await response.Content.ReadAsStringAsync());
+
+            //Error handeling
+            log.LogInformation($"You currently have {arr.Count} issues open.");
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Call unsuccessful: {response.IsSuccessStatusCode}");
+            };
+
+            //Define POST URL to POST TeamsBody to Teams
+            var teamsurl = System.Environment.GetEnvironmentVariable("TEAMS_URL", EnvironmentVariableTarget.Process);
+            log.LogInformation($"URL: {teamsurl}");
+
+            // Create TeamsBody
+            var TeamsBody = new
+            { 
+                body = new
+                {
+                    content = $"You currently have {arr.Count} issues open."
+                }
+            };
+            log.LogInformation($"Body: {TeamsBody.body.content}");
+
+            //Define POST header
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+            //POST call with TeamsBody content
+            HttpRequestMessage requestteams = new HttpRequestMessage(HttpMethod.Post, teamsurl);
+            requestteams.Content = new ObjectContent<object>(TeamsBody, new JsonMediaTypeFormatter());
+            var responseteams = await httpClient.SendAsync(requestteams);
+            log.LogInformation($"Response: {responseteams.IsSuccessStatusCode}");
+
+            //Error handeling
+            if (!responseteams.IsSuccessStatusCode)
+            {
+                throw new Exception($"Call unsuccessful: {responseteams.IsSuccessStatusCode}");
+            };
+        }
+    }
+}
 ```
